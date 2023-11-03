@@ -5,12 +5,21 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use Illuminate\Http\Request;
 
+use function PHPUnit\Framework\isEmpty;
+
 class StudentController extends Controller
 {
     //get
     public function index()
     {
         $students = Student::all();
+        //jika data kosong kirim status code 204
+        if ($students->isEmpty()) {
+            $data = [
+                "message" => "Resource is empty"
+            ];
+            return response()->json($data, 204);
+        }
         $data = [
             "message" => "Get all resource",
             "data" => $students
@@ -19,9 +28,33 @@ class StudentController extends Controller
         //kirim data dan respon code
         return response()->json($data, 200);
     }
+     //Snow
+     public function show($id){
+        $student = Student::find($id);
+        
+        if ($student){
+            $data = [
+                'message' => 'Get detail student',
+                'data' => $student,
+            ];
+            return response()->json($data. 200);
+        } else {
+            $data = [
+                'message' => 'Student not found',
+            ];
+            return response()->json($data, 404);
+        }
+    }
     //post
     public function store(Request $request)
     {
+        //validasi request
+        $request->validate([
+            "nama" => "required",
+            "nim" => "required",
+            "email" => "required|email",
+            "jurusan" => "required"
+        ]);
         $input = [
             'nama' => $request->nama,
             'nim' => $request->nim,
@@ -41,39 +74,45 @@ class StudentController extends Controller
     {
         $student = Student::find($id);
 
-        if (!$student) {
-            return response()->json(['message' => 'Student not found'], 404);
+        if ($student) {
+            $input = [
+                'nama' => $request->nama ?? $student->nama,
+                'nim' => $request->nim ?? $student->nim,
+                'email' => $request->email ?? $student->email,
+                'jurusan' => $request->jurusan ?? $student->jurusan
+            ];
+            $student->update($input);
+
+            $data = [
+                'message' => 'Student is updated',
+                'data' => $student,
+            ];
+
+            return response()->json($data, 200);
+        } else {
+            $data = [
+                'message' => 'Student not found'
+            ];
+            return response()->json($data, 404);
         }
-
-        $student->nama = $request->input('nama', $student->nama);
-        $student->nim = $request->input('nim', $student->nim);
-        $student->email = $request->input('email', $student->email);
-        $student->jurusan = $request->input('jurusan', $student->jurusan);
-
-        $student->save();
-
-        $data = [
-            'message' => 'Student is updated successfully',
-            'data' => $student,
-        ];
-
-        return response()->json($data, 200);
     }
     //delete
     public function destroy($id)
     {
         $student = Student::find($id);
 
-        if (!$student) {
-            return response()->json(['message' => 'Student not found'], 404);
+        if ($student) {
+            $student->delete();
+            $data = [
+                'message' => 'Student is deleted'
+            ];
+            return response()->json($data, 200);
+        } else {
+            $data = [
+                'message' => 'Student not found'
+            ];
         }
-
-        $student->delete();
-
-        $data = [
-            'message' => 'Student has been deleted successfully',
-        ];
-
-        return response()->json($data, 200);
+        return response()->json($data, 404);
     }
+   
 }
