@@ -28,7 +28,7 @@ class StudentController extends Controller
         //kirim data dan respon code
         return response()->json($data, 200);
     }
-     //Snow
+     //Show
      public function show($id){
         $student = Student::find($id);
         
@@ -49,19 +49,14 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         //validasi request
-        $request->validate([
+        $validatedData = $request->validate([
             "nama" => "required",
-            "nim" => "required",
-            "email" => "required|email",
+            "nim" => "numeric|required",
+            "email" => "email|required",
             "jurusan" => "required"
         ]);
-        $input = [
-            'nama' => $request->nama,
-            'nim' => $request->nim,
-            'email' => $request->email,
-            'jurusan' => $request->jurusan
-        ];
-        $student = Student::create($input);
+        
+        $student = Student::create($validatedData);
 
         $data = [
             'message' => 'Student is created succesfully',
