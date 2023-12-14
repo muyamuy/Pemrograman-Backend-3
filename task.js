@@ -1,5 +1,5 @@
 const showDownload = (result) => {
-    console.log("Download selesai");
+    console.log("Download Selesai");
     console.log(`Hasil Download: ${result}`);
 }
 
@@ -18,6 +18,3 @@ const main = () => {
 };
 
 main();
-  
-  
-
